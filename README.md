@@ -1,9 +1,9 @@
 # Hrack
-## أداة تخمين كلمات سر شبكات الـWi-Fi حسابات الإنستقرام
+## أداة تخمين كلمات سر شبكات الـWi-Fi وحسابات الانستقرام
 
-<img src="https://github.com/tlersa/Hrack/assets/111729973/ec7a16e1-057e-4bae-b4b9-e39084428998" width="800" alt="واجهة الأداة">
+<img src="https://github.com/tlersa/Hrack/assets/111729973/ec7a16e1-057e-4bae-b4b9-e39084428998" width="1000" alt="واجهة الأداة">
 
-#### أوامر التثبيت (Linux, iSH, Termux)
+### أوامر التثبيت (Linux, iSH, Termux)
 ```
 git clone https://github.com/tlersa/Hrack.git
 cd Hrack/
